@@ -1,0 +1,54 @@
+{{ if .Values.serviceAccount.create }}
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "kube-go-exec.serviceAccountName" . }}
+  namespace: {{ include "kube-go-exec.serviceAccountNamespace" . }}
+  labels:
+    {{- include "kube-go-exec.labels" . | nindent 4 }}
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    {{- include "kube-go-exec.labels" . | nindent 4 }}
+  name: "{{ include "kube-go-exec.serviceAccountName" . }}-cluser-role"
+  namespace: {{ include "kube-go-exec.serviceAccountNamespace" . }}
+rules:
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - pods/exec
+  verbs:
+    - create
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    {{- include "kube-go-exec.labels" . | nindent 4 }}
+  name: "{{ include "kube-go-exec.serviceAccountName" . }}-binding"
+  namespace: {{ include "kube-go-exec.serviceAccountNamespace" . }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: "{{ include "kube-go-exec.serviceAccountName" . }}-cluser-role"
+subjects:
+- kind: ServiceAccount
+  name: {{ include "kube-go-exec.serviceAccountName" . }}
+  namespace: {{ include "kube-go-exec.serviceAccountNamespace" . }}
+
+{{- end }}

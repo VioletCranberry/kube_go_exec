@@ -1,0 +1,33 @@
+helmDefaults:
+  wait: true
+
+releases:
+- name: kube-go-exec
+  namespace: default
+  chart: ./helm/kube-go-exec
+  values:
+    - serviceAccount:
+        create: true
+        name: kube-go-exec
+        namespace: default
+    - secrets:
+      - name: SLACK_CHANNEL_ID
+        value: 'my_channel_id'
+      - name: SLACK_TOKEN
+        value: 'my_slack_token'
+    - cronjobs:
+      - name: my_test_command
+        schedule: "0 2 * * *"
+        env:
+        - name: KUBERNETES_NAMESPACE
+          value: 'my_namespace'
+        - name: KUBERNETES_POD_LABEL
+          value: 'app=my_app'
+        - name: KUBERNETES_CONTAINER
+          value: 'app_container'
+        - name: KUBERNETES_POD_EXEC
+          value: >-
+            /bin/bash -c
+            "echo TEST"
+      - name: my_another_test_command
+      ...

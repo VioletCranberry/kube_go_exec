@@ -1,0 +1,38 @@
+{{- range $key, $value := .Values.cronjobs }}
+
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    {{- include "kube-go-exec.selectorLabels" $ | nindent 4 }}
+  name: {{ .name }}
+  namespace: {{ include "kube-go-exec.serviceAccountNamespace" $ }}
+spec:
+  schedule: {{ .schedule | quote }}
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: {{ include "kube-go-exec.serviceAccountName" $ }}
+          containers:
+          - name: {{ .name }}
+            image: "{{ $.Values.image.repository }}:{{ $.Values.image.tag }}"
+            imagePullPolicy: Always
+            env:
+            {{- range $key, $value := .env }}
+            - name: {{ .name }}
+              value: {{ .value }}
+            {{- end }}
+            {{- range $key, $value := $.Values.secrets }}
+            - name: {{ .name }}
+              valueFrom:
+                secretKeyRef:
+                  name: "{{ .name | replace "_" "-" | lower }}-secret"
+                  key: {{ .name }}
+            {{- end }}
+          restartPolicy: Never
+---
+
+{{- end }}

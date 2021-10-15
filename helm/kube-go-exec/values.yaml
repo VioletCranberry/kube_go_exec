@@ -1,0 +1,35 @@
+image:
+  repository: 'your_repo'
+  tag: latest
+
+serviceAccount:
+  create:
+  name:
+  namespace:
+
+secrets:
+- name: SLACK_CHANNEL_ID
+  value: ''
+- name: SLACK_TOKEN
+  value: ''
+
+cronjobs:
+  - name: test-echo-foo-0
+    schedule: "* * * * *"
+    env:
+    - name: KUBERNETES_NAMESPACE
+      value: ''
+    - name: KUBERNETES_POD_LABEL
+      value: ''
+    - name: KUBERNETES_CONTAINER
+      value: ''
+    - name: KUBERNETES_POD_EXEC
+      value: ''
+
+#  - name: test-echo-foo-1
+#    schedule: "* * * * *"
+#    env: {}
+
+#  - name: test-echo-foo-2
+#    schedule: "* * * * *"
+#    env: {}
